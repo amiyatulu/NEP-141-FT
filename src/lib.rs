@@ -3,7 +3,7 @@ use near_sdk::collections::{LookupMap, UnorderedMap};
 use near_sdk::json_types::{ValidAccountId, U128};
 use near_sdk::{
     assert_one_yocto, env, ext_contract, log, AccountId, Balance, Gas,
-    PromiseOrValue, PromiseResult, StorageUsage,
+    PromiseOrValue, PromiseResult, StorageUsage, 
 };
 use near_sdk::{near_bindgen};
 pub mod core;
@@ -18,6 +18,7 @@ const GAS_FOR_RESOLVE_TRANSFER: Gas = 5_000_000_000_000;
 const GAS_FOR_FT_TRANSFER_CALL: Gas = 25_000_000_000_000 + GAS_FOR_RESOLVE_TRANSFER;
 
 const NO_DEPOSIT: Balance = 0;
+
 
 #[ext_contract(ext_self)]
 trait FungibleTokenResolver {
@@ -146,7 +147,9 @@ impl FungibleToken {
 
 }
 
+#[near_bindgen]
 impl FungibleTokenCore for FungibleToken {
+    #[payable]
     fn ft_transfer(&mut self, receiver_id: ValidAccountId, amount: U128, memo: Option<String>) {
         assert_one_yocto();
         let sender_id = env::predecessor_account_id();
@@ -154,6 +157,7 @@ impl FungibleTokenCore for FungibleToken {
         self.internal_transfer(&sender_id, receiver_id.as_ref(), amount, memo);
     }
 
+    #[payable]
     fn ft_transfer_call(
         &mut self,
         receiver_id: ValidAccountId,
@@ -194,7 +198,7 @@ impl FungibleTokenCore for FungibleToken {
     }
 }
 
-
+#[near_bindgen]
 impl FungibleToken {
     /// Internal method that returns the amount of burned tokens in a corner case when the sender
     /// has deleted (unregistered) their account while the `ft_transfer_call` was still in flight.
@@ -241,8 +245,16 @@ impl FungibleToken {
         }
         (amount, 0)
     }
+    pub fn register_account(&self, account_id: ValidAccountId)  {
+        
+    }
+
+    pub fn unregister_account(&self, account_id: ValidAccountId) {
+      
+    }
 }
 
+#[near_bindgen]
 impl FungibleTokenResolver for FungibleToken {
     fn ft_resolve_transfer(
         &mut self,
